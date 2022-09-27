@@ -217,7 +217,7 @@ class piDhtBot:
             time.sleep(1)
             # check if all threads are still alive
             for thread in threads:
-                if thread.isAlive():
+                if thread.is_alive():
                     continue
 
                 # something went wrong, bailing out
