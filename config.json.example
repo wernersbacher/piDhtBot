@@ -21,7 +21,7 @@
 
     "//": "DHT sensor settings",
     "dht": {
-        "//": "DHT type (can be either DHT11 or DHT22",
+        "//": "DHT type (can be either DHT11 or DHT22)",
         "type": "DHT22",
 
         "//": "GPIO input pin of DHT sensor",
@@ -32,6 +32,17 @@
 	"//": "each record is about 32 bytes, so an interval of 60 seconds will result in 45 kB per day.",
 	"read_interval": 60.0
     },
+
+    "//": "MHZ sensor settings",
+    "mhz": {
+        "//": "Enable or disable MHZ sensor",
+        "enabled": true,
+
+
+	"//": "sensor read intervall in seconds",
+	"read_interval": 60.0
+    },
+
 
     "//": "image plotting settings",
     "plot": {
