@@ -252,7 +252,7 @@ class piDhtBot:
 						   (recordDHT.ts.replace(microsecond=0), recordDHT.temp, recordDHT.hum))
 
 		# todo: check if enabled
-		recordMHZ = self.lastRecordDHT
+		recordMHZ = self.lastRecordMHZ
 		message.reply_text('%s\nCO2: %d ppm' %
 						   (recordMHZ.ts.replace(microsecond=0), recordMHZ.co2))
 
