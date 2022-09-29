@@ -171,7 +171,7 @@ class piDhtBot:
 		threads.append(dht_thread)
 
 		# set up MHZ thread
-		mhz_thread = threading.Thread(target=self.readMHZ(), name="MHZ")
+		mhz_thread = threading.Thread(target=self.readMHZ, name="MHZ")
 		mhz_thread.daemon = True
 		mhz_thread.start()
 		threads.append(mhz_thread)
