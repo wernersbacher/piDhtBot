@@ -618,7 +618,7 @@ class piDhtBot:
 			temp, hum = self.lastRecordDHT.get()
 			co2 = self.lastRecordMHZ.co2
 
-			if temp.hum == 0:
+			if hum == 0:
 				time.sleep(0.2)  # wait for first real data
 				continue
 
