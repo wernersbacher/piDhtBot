@@ -665,9 +665,9 @@ class piDhtBot:
 				self.addRecord(record)
 
 			try:
-				temp = hum = None
-				temp = self.dhtDevice.temperature
-				hum = self.dhtDevice.humidity
+				temp = (self.dhtDevice.temperature + self.config["dht"]["offset_temp"]) * self.config["dht"]["scale_temp"]
+				hum = (self.dhtDevice.humidity + self.config["dht"]["offset_hum"]) * self.config["dht"]["scale_hum"]
+
 			except RuntimeError as e:
 				# errors are expected when reading from DHT, only log them in debug mode
 				self.logger.debug('DHT: Received exception: %s' % e)

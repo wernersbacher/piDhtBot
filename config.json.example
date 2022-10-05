@@ -35,6 +35,13 @@
         "//": "each record is about 32 bytes, so an interval of 60 seconds will result in 45 kB per day.",
         "read_interval": 60.0,
 
+        "//": "will get added to the read value",
+        "offset_hum": 0,
+        "offset_temp": 0,
+        "//": "will be multiplied with the read value AFTER adding the offset"
+        "scale_hum": 1,
+        "scale_temp": 1.
+
         "//": "humidity threshold value after which a message will be send, for the min time has to be passed",
         "thres": 62,
         "thres_time_passed": 600
