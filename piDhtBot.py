@@ -248,13 +248,16 @@ class piDhtBot:
 			return
 
 		recordDHT = self.lastRecordDHT
-		message.reply_text('%s\nTemperature: %.2f °C\nHumidity: %.2f %%' %
-						   (recordDHT.ts.replace(microsecond=0), recordDHT.temp, recordDHT.hum))
 
-		# todo: check if enabled
-		recordMHZ = self.lastRecordMHZ
-		message.reply_text('%s\nCO2: %d ppm' %
-						   (recordMHZ.ts.replace(microsecond=0), recordMHZ.co2))
+		output = f'{recordDHT.ts.replace(microsecond=0)}\n' \
+				 f'Temperature: {recordDHT.temp:.2f} °C\n' \
+				 f'Humidity: {recordDHT.hum:.2f} %\n'
+
+		if self.config['mhz']['enabled']:
+			recordMHZ = self.lastRecordMHZ
+			output += f"\nCO2: {recordMHZ.co2}"
+
+		message.reply_text(output)
 
 	def commandLog(self, update):
 		"""Handle the log command. Show recent log messages."""
@@ -390,7 +393,8 @@ class piDhtBot:
 		self.logger.info(msg)
 		message.reply_text(msg)
 
-		records = self.getRecords(dateStart, dateEnd)
+		recordBaseName = self.botName + '_dht.rec'
+		records = self.getRecords(recordBaseName, dateStart, dateEnd)
 		if len(records.recordList) == 0:
 			message.reply_text('No data for this time range.')
 			return
@@ -424,10 +428,10 @@ class piDhtBot:
 		elif isinstance(record, MHZRecord):
 			self.recorder_mhz.info('%s %.2f' % (ts, record.co2))
 
-	def getRecords(self, dateStart=None, dateEnd=None):
+	def getRecords(self, recordBaseName, dateStart=None, dateEnd=None):
 		"""Get records for the given time range."""
 		allRecords = RecordCollection()
-		for recordFile in self.listRecordFiles(dateStart, dateEnd):
+		for recordFile in self.listRecordFiles(recordBaseName, dateStart, dateEnd):
 			records = self.readRecords(recordFile, dateStart, dateEnd)
 			if len(records.recordList) == 0:
 				continue
@@ -435,13 +439,12 @@ class piDhtBot:
 			allRecords.addRecordList(records)
 		return allRecords
 
-	def listRecordFiles(self, dateStart=None, dateEnd=None):
+	def listRecordFiles(self, recordBaseName, dateStart=None, dateEnd=None):
 		"""List all record files."""
 		if dateStart is not None:
 			# replace with start of the day since data records are stored per day
 			dateStart = dateStart.replace(hour=0, minute=0, second=0, microsecond=0)
 		recordFiles = []
-		recordBaseName = self.botName + '.rec'
 		files = os.listdir('.')
 		files.sort()
 		for fileName in files:
