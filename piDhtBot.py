@@ -15,11 +15,14 @@ import sys
 import threading
 import time
 from collections import deque
+
+import requests
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, MAX_MESSAGE_LENGTH
 from telegram.error import NetworkError, Unauthorized
 from telegram.ext import Updater, MessageHandler, Filters, CallbackQueryHandler
 import mh_z19
 from Records import RecordCollection, DHTRecord, MHZRecord
+from utils import SlowedCaller
 
 
 class piDhtBot:
@@ -45,9 +48,9 @@ class piDhtBot:
 		# date time format for recorded data
 		self.dateTimeFormat = '%Y-%m-%d %H:%M:%S'
 		# last data record for DHT sensor
-		self.lastRecordDHT: DHTRecord = None
+		self.lastRecordDHT: DHTRecord = DHTRecord()
 		# last data record for MHZ sensor
-		self.lastRecordMHZ: MHZRecord = None
+		self.lastRecordMHZ: MHZRecord = MHZRecord()
 
 		self.last_time_below_thres_dht = 0
 		self.last_time_below_thres_mhz = 0
@@ -173,6 +176,12 @@ class piDhtBot:
 		mhz_thread.start()
 		threads.append(mhz_thread)
 
+		# set up Webhook thread
+		webhook_thread = threading.Thread(target=self.webhook_refresh, name="WebhookRefresh")
+		webhook_thread.daemon = True
+		webhook_thread.start()
+		threads.append(webhook_thread)
+
 		# telegram: register message handler and start polling
 		# note: we don't register each command individually because then we
 		# wouldn't be able to check the ownerID, instead we register for text
@@ -201,6 +210,7 @@ class piDhtBot:
 				sys.exit(1)
 
 			self.check_ventilation_needed()
+			self.webhook_refresh()
 
 	def performCommand(self, update, context):
 		"""Handle a received command."""
@@ -589,6 +599,35 @@ class piDhtBot:
 			recordMHZ = self.lastRecordMHZ
 			output += f"CO2: {recordMHZ.co2} ppm"
 			return output
+
+	def webhook_refresh(self):
+		"""sends current state to configured webhook
+		todo: exit gracefully?
+		"""
+		self.logger.info('Setting up Webhook thread')
+		now = time.time()
+		webhook_enabled = self.config["webhook"]["enabled"]
+		webhook_interval = self.config["webhook"]["interval"]
+		webhook_multi = self.config["webhook"]["multi"]
+
+		if not webhook_enabled:
+			return
+
+		url = self.config["webhook"]["url"]
+
+		while True:
+			temp, hum = self.lastRecordDHT.get()
+			co2 = self.lastRecordMHZ.co2
+
+			formatted_url = url.format(temp*webhook_multi, hum*webhook_multi, co2*webhook_multi)
+			r = requests.get(formatted_url)
+			if r.status_code != 200:
+				self.logger.warning(f"Could not update webhook: {r.status_code}, \nURL: {formatted_url}")
+
+			nextRead = now + webhook_interval
+			now = time.time()
+			if now < nextRead:
+				time.sleep(nextRead - now)
 
 	def readDHT(self):
 		"""Continuously read from the DHT sensor."""

@@ -2,3 +2,4 @@ python-telegram-bot
 adafruit-circuitpython-dht
 matplotlib
 mh_z19
+requests

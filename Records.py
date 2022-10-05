@@ -1,16 +1,19 @@
 class DHTRecord:
 	"""Single DHT record."""
 
-	def __init__(self, ts, temp, hum):
+	def __init__(self, ts=0, temp=0, hum=0):
 		self.ts = ts
 		self.temp = temp
 		self.hum = hum
+
+	def get(self):
+		return self.temp, self.hum
 
 
 class MHZRecord:
 	"""Single MHZ record."""
 
-	def __init__(self, ts, co2):
+	def __init__(self, ts=0, co2=0):
 		self.ts = ts
 		self.co2 = co2
 

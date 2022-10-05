@@ -41,7 +41,7 @@
 
     },
 
-    "//": "MHZ sensor settings",
+    "//": "MHZ 16/19 sensor (co2) settings",
     "mhz": {
         "//": "Enable or disable MHZ sensor",
         "enabled": true,
@@ -69,5 +69,21 @@
 
     	"//": "dpi of plotted images",
 	    "dpi": 100
+    },
+
+    "//": "call a third party website",
+    "webhook": {
+        "enabled": true,
+
+        "//": "call interval in seconds",
+        "interval": 30,
+
+        "//": "url path which will get called. be sure to put them in the right order: temp, hum, co2",
+        "url": "http://example.com/update.php?temp={}&hum={}&co2={}",
+
+        "//": "multiply values with this factor. keep at 1 for most usages.",
+        "multi": 1
     }
+
+
 }
