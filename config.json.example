@@ -7,10 +7,10 @@
         "startup_timeout": 0,
 
 	    "//": "number of days after which records will get deleted. use 0 to keep them forever",
-	    "record_days": 0
+	    "record_days": 0,
 
 	    "//": "if enabled, thresholds configured below will be check and a message will be sent if above values",
-	    "enable_ventilation_checker": True
+	    "enable_ventilation_checker": true
     },
 
     "//": "telegram-related settings",
@@ -47,7 +47,7 @@
         "enabled": true,
 
         "//": "sensor read intervall in seconds",
-        "read_interval": 60.0
+        "read_interval": 60.0,
 
         "//": "co2 threshold value after which a message will be send, for the min time has to be passed",
         "thres": 1800,
@@ -61,13 +61,13 @@
         "//": "path where the plotted images will be stored, temporarily",
         "path": "/tmp/piDhtBot.png",
 
-	"//": "width of plotted image in inch, set to 0 to use the default",
-	"width": 12.8,
+        "//": "width of plotted image in inch, set to 0 to use the default",
+        "width": 12.8,
 
-	"//": "height of plotted image in height, set to 0 to use the default",
-	"height": 9.6,
+        "//": "height of plotted image in height, set to 0 to use the default",
+        "height": 9.6,
 
     	"//": "dpi of plotted images",
-	"dpi": 100
+	    "dpi": 100
     }
 }

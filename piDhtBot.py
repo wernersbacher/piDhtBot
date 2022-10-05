@@ -516,6 +516,10 @@ class piDhtBot:
 
 	def check_ventilation_needed(self):
 		""" checks if values below threshold for a longer time so it sends a message"""
+
+		if not self.config['general']['enable_ventilation_checker']:
+			return
+
 		now = time.time()
 		mhz_enabled = self.config['mhz']['enabled']
 
@@ -551,6 +555,7 @@ class piDhtBot:
 				trigger_message = True
 
 		if trigger_message and not self.trigger_message_sent:
+			self.logger.info("Sending warning message because of threshold values!")
 			message = "ATTENTION! You should open some windows!\n"
 			message += self.create_info_string()
 			self.send_all(message)
@@ -559,7 +564,6 @@ class piDhtBot:
 		elif not trigger_message:
 			# below thresholds so we are allowed to send a message again!
 			self.trigger_message_sent = False
-
 
 	def send_all(self, message):
 		bot = self.updater.bot
@@ -583,7 +587,7 @@ class piDhtBot:
 
 		if self.config['mhz']['enabled']:
 			recordMHZ = self.lastRecordMHZ
-			output += f"\nCO2: {recordMHZ.co2} ppm"
+			output += f"CO2: {recordMHZ.co2} ppm"
 			return output
 
 	def readDHT(self):
