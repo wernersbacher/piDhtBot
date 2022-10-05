@@ -585,7 +585,7 @@ class piDhtBot:
 				self.logger.exception('Could not send message to user %s:' % ownerID)
 
 	def create_info_string(self):
-		if self.lastRecordDHT is None:
+		if self.lastRecordDHT.hum == 0:
 			return 'No data yet.'
 
 		recordDHT = self.lastRecordDHT
@@ -617,6 +617,10 @@ class piDhtBot:
 		while True:
 			temp, hum = self.lastRecordDHT.get()
 			co2 = self.lastRecordMHZ.co2
+
+			if temp.hum == 0:
+				time.sleep(0.2)  # wait for first real data
+				continue
 
 			formatted_url = url.format(temp*webhook_multi, hum*webhook_multi, co2*webhook_multi)
 			r = requests.get(formatted_url)
