@@ -548,8 +548,6 @@ class piDhtBot:
 				self.logger.error("No MHZ threshold config found for ventilation checker!")
 				return
 			last_co2 = self.lastRecordMHZ.co2
-			deb = f"{last_co2, now - self.last_time_below_thres_dht, mhz_time}"
-			self.logger.info(deb)
 			if last_co2 < mhz_thres:
 				self.last_time_below_thres_mhz = now
 			elif now - self.last_time_below_thres_mhz >= mhz_time:
