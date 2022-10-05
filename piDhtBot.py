@@ -170,17 +170,19 @@ class piDhtBot:
 		dht_thread.start()
 		threads.append(dht_thread)
 
-		# set up MHZ thread
-		mhz_thread = threading.Thread(target=self.readMHZ, name="MHZ")
-		mhz_thread.daemon = True
-		mhz_thread.start()
-		threads.append(mhz_thread)
+		if self.config['mhz']['enabled']:
+			# set up MHZ thread
+			mhz_thread = threading.Thread(target=self.readMHZ, name="MHZ")
+			mhz_thread.daemon = True
+			mhz_thread.start()
+			threads.append(mhz_thread)
 
-		# set up Webhook thread
-		webhook_thread = threading.Thread(target=self.webhook_refresh, name="WebhookRefresh")
-		webhook_thread.daemon = True
-		webhook_thread.start()
-		threads.append(webhook_thread)
+		if self.config["webhook"]["enabled"]:
+			# set up Webhook thread
+			webhook_thread = threading.Thread(target=self.webhook_refresh, name="WebhookRefresh")
+			webhook_thread.daemon = True
+			webhook_thread.start()
+			threads.append(webhook_thread)
 
 		# telegram: register message handler and start polling
 		# note: we don't register each command individually because then we
@@ -605,12 +607,8 @@ class piDhtBot:
 		"""
 		self.logger.info('Setting up Webhook thread')
 		now = time.time()
-		webhook_enabled = self.config["webhook"]["enabled"]
 		webhook_interval = self.config["webhook"]["interval"]
 		webhook_multi = self.config["webhook"]["multi"]
-
-		if not webhook_enabled:
-			return
 
 		url = self.config["webhook"]["url"]
 
@@ -705,11 +703,6 @@ class piDhtBot:
 
 	def readMHZ(self):
 		self.logger.info('Setting up MHZ thread')
-
-		enabled = self.config['mhz']['enabled']
-		if not enabled:
-			self.logger.info('MHZ sensor is disabled, aborting MHZ thread.')
-			return
 
 		# add gap marker
 		now = datetime.datetime.now()
