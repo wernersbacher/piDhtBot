@@ -552,7 +552,7 @@ class piDhtBot:
 			self.logger.info(deb)
 			if last_co2 < mhz_thres:
 				self.last_time_below_thres_mhz = now
-			elif now - self.last_time_below_thres_dht >= mhz_time:
+			elif now - self.last_time_below_thres_mhz >= mhz_time:
 				# above thres for a long time, send message please!
 				trigger_message = True
 
