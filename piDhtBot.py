@@ -541,6 +541,7 @@ class piDhtBot:
 			trigger_message = True
 
 		if mhz_enabled:
+			self.logger.info("MHZ is enabled!")
 			try:
 				mhz_thres = self.config['mhz']['thres']
 				mhz_time = self.config['mhz']['thres_time_passed']
@@ -548,10 +549,13 @@ class piDhtBot:
 				self.logger.error("No MHZ threshold config found for ventilation checker!")
 				return
 			last_co2 = self.lastRecordMHZ.co2
+			self.logger.info(last_co2)
 			if last_co2 < mhz_thres:
+				self.logger.info("co2 below trigger threshold")
 				self.last_time_below_thres_mhz = now
 			elif now - self.last_time_below_thres_dht >= mhz_time:
 				# above thres for a long time, send message please!
+				self.logger.info("co2 above trigger threshold")
 				trigger_message = True
 
 		if trigger_message and not self.trigger_message_sent:
