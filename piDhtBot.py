@@ -45,9 +45,13 @@ class piDhtBot:
 		# date time format for recorded data
 		self.dateTimeFormat = '%Y-%m-%d %H:%M:%S'
 		# last data record for DHT sensor
-		self.lastRecordDHT = None
+		self.lastRecordDHT: DHTRecord = None
 		# last data record for MHZ sensor
-		self.lastRecordMHZ = None
+		self.lastRecordMHZ: MHZRecord = None
+
+		self.last_time_below_thres_dht = 0
+		self.last_time_below_thres_mhz = 0
+		self.trigger_message_sent = False
 
 		# DHT sensor
 		self.dhtDevice = None
@@ -153,14 +157,7 @@ class piDhtBot:
 			self.logger.error('Could not access Telegram API within time, shutting down')
 			sys.exit(1)
 
-		# pretend to be nice to our owners
-		ownerIDs = self.config['telegram']['owner_ids']
-		for ownerID in ownerIDs:
-			try:
-				bot.sendMessage(chat_id=ownerID, text='Hello there, I\'m back!')
-			except:
-				# most likely network problem or user has blocked the bot
-				self.logger.exception('Could not send hello to user %s:' % ownerID)
+		self.send_all("Hello, I'm back online!")
 
 		threads = []
 
@@ -185,7 +182,7 @@ class piDhtBot:
 		self.updater.start_polling()
 
 		while True:
-			time.sleep(1)
+			time.sleep(5)
 			# check if all threads are still alive
 			for thread in threads:
 				if thread.is_alive():
@@ -194,6 +191,7 @@ class piDhtBot:
 				# something went wrong, bailing out
 				msg = 'Thread "%s" died, terminating now.' % thread.name
 				self.logger.error(msg)
+				ownerIDs = self.config['telegram']['owner_ids']
 				for ownerID in ownerIDs:
 					try:
 						bot.sendMessage(chat_id=ownerID, text=msg)
@@ -201,6 +199,8 @@ class piDhtBot:
 						self.logger.exception('Exception while trying to notify owners:')
 						pass
 				sys.exit(1)
+
+			self.check_ventilation_needed()
 
 	def performCommand(self, update, context):
 		"""Handle a received command."""
@@ -243,21 +243,10 @@ class piDhtBot:
 	def commandShow(self, update):
 		"""Handle the show command. Show the last recorded data."""
 		message = update.message
-		if self.lastRecordDHT is None:
-			message.reply_text('No data yet.')
-			return
 
-		recordDHT = self.lastRecordDHT
+		text = self.create_info_string()
 
-		output = f'{recordDHT.ts.replace(microsecond=0)}\n' \
-				 f'Temperature: {recordDHT.temp:.2f} °C\n' \
-				 f'Humidity: {recordDHT.hum:.2f} %\n'
-
-		if self.config['mhz']['enabled']:
-			recordMHZ = self.lastRecordMHZ
-			output += f"\nCO2: {recordMHZ.co2}"
-
-		message.reply_text(output)
+		message.reply_text(text)
 
 	def commandLog(self, update):
 		"""Handle the log command. Show recent log messages."""
@@ -524,6 +513,78 @@ class piDhtBot:
 		plt.tight_layout()
 
 		plt.savefig(self.plotImagePath)
+
+	def check_ventilation_needed(self):
+		""" checks if values below threshold for a longer time so it sends a message"""
+		now = time.time()
+		mhz_enabled = self.config['mhz']['enabled']
+
+		trigger_message = False
+
+		try:
+			dht_thres = self.config['dht']['thres']
+			dht_time = self.config['dht']['thres_time_passed']
+		except KeyError:
+			self.logger.error("No DHT threshold config found for ventilation checker!")
+			return
+
+		last_hum = self.lastRecordDHT.hum
+		if last_hum < dht_thres:
+			# if below thres, reset timestamp.
+			self.last_time_below_thres_dht = now
+		elif now - self.last_time_below_thres_dht >= dht_time:
+			# check if threshold is above value for a long time so we trigger a message
+			trigger_message = True
+
+		if mhz_enabled:
+			try:
+				mhz_thres = self.config['mhz']['thres']
+				mhz_time = self.config['mhz']['thres_time_passed']
+			except KeyError:
+				self.logger.error("No MHZ threshold config found for ventilation checker!")
+				return
+			last_co2 = self.lastRecordMHZ.co2
+			if last_co2 < mhz_thres:
+				self.last_time_below_thres_mhz = now
+			elif now - self.last_time_below_thres_dht >= mhz_time:
+				# above thres for a long time, send message please!
+				trigger_message = True
+
+		if trigger_message and not self.trigger_message_sent:
+			message = "ATTENTION! You should open some windows!\n"
+			message += self.create_info_string()
+			self.send_all(message)
+			# stop sending the message again
+			self.trigger_message_sent = True
+		elif not trigger_message:
+			# below thresholds so we are allowed to send a message again!
+			self.trigger_message_sent = False
+
+
+	def send_all(self, message):
+		bot = self.updater.bot
+		ownerIDs = self.config['telegram']['owner_ids']
+		for ownerID in ownerIDs:
+			try:
+				bot.sendMessage(chat_id=ownerID, text=message)
+			except:
+				# most likely network problem or user has blocked the bot
+				self.logger.exception('Could not send message to user %s:' % ownerID)
+
+	def create_info_string(self):
+		if self.lastRecordDHT is None:
+			return 'No data yet.'
+
+		recordDHT = self.lastRecordDHT
+
+		output = f'{recordDHT.ts.replace(microsecond=0)}\n' \
+				 f'Temperature: {recordDHT.temp:.2f} °C\n' \
+				 f'Humidity: {recordDHT.hum:.2f} %\n'
+
+		if self.config['mhz']['enabled']:
+			recordMHZ = self.lastRecordMHZ
+			output += f"\nCO2: {recordMHZ.co2} ppm"
+			return output
 
 	def readDHT(self):
 		"""Continuously read from the DHT sensor."""

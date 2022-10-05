@@ -2,12 +2,15 @@
     "//": "general settings",
     "general": {
         "//": "how long to wait after startup for the network & API to become accessible",
-	"//": "useful if started after boot while the network is still being set up",
-	"//": "value is in seconds, specify 0 to wait forever until access succeeds",
+	    "//": "useful if started after boot while the network is still being set up",
+	    "//": "value is in seconds, specify 0 to wait forever until access succeeds",
         "startup_timeout": 0,
 
-	"//": "number of days after which records will get deleted. use 0 to keep them forever",
-	"record_days": 0
+	    "//": "number of days after which records will get deleted. use 0 to keep them forever",
+	    "record_days": 0
+
+	    "//": "if enabled, thresholds configured below will be check and a message will be sent if above values",
+	    "enable_ventilation_checker": True
     },
 
     "//": "telegram-related settings",
@@ -27,10 +30,15 @@
         "//": "GPIO input pin of DHT sensor",
         "gpio": 17,
 
-	"//": "sensor read intervall in seconds, you can also use 0 for continuous reads",
-	"//": "(which will read every 2.0 seconds, which is the minimum read interval).",
-	"//": "each record is about 32 bytes, so an interval of 60 seconds will result in 45 kB per day.",
-	"read_interval": 60.0
+        "//": "sensor read intervall in seconds, you can also use 0 for continuous reads",
+        "//": "(which will read every 2.0 seconds, which is the minimum read interval).",
+        "//": "each record is about 32 bytes, so an interval of 60 seconds will result in 45 kB per day.",
+        "read_interval": 60.0,
+
+        "//": "humidity threshold value after which a message will be send, for the min time has to be passed",
+        "thres": 62,
+        "thres_time_passed": 600
+
     },
 
     "//": "MHZ sensor settings",
@@ -38,9 +46,13 @@
         "//": "Enable or disable MHZ sensor",
         "enabled": true,
 
+        "//": "sensor read intervall in seconds",
+        "read_interval": 60.0
 
-	"//": "sensor read intervall in seconds",
-	"read_interval": 60.0
+        "//": "co2 threshold value after which a message will be send, for the min time has to be passed",
+        "thres": 1800,
+        "thres_time_passed": 600
+
     },
 
 
