@@ -210,7 +210,6 @@ class piDhtBot:
 				sys.exit(1)
 
 			self.check_ventilation_needed()
-			self.webhook_refresh()
 
 	def performCommand(self, update, context):
 		"""Handle a received command."""
