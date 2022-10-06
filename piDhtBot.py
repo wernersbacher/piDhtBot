@@ -202,13 +202,7 @@ class piDhtBot:
 				# something went wrong, bailing out
 				msg = 'Thread "%s" died, terminating now.' % thread.name
 				self.logger.error(msg)
-				ownerIDs = self.config['telegram']['owner_ids']
-				for ownerID in ownerIDs:
-					try:
-						bot.sendMessage(chat_id=ownerID, text=msg)
-					except:
-						self.logger.exception('Exception while trying to notify owners:')
-						pass
+				self.send_all(msg)
 				sys.exit(1)
 
 			self.check_ventilation_needed()
