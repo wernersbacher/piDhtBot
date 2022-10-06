@@ -659,9 +659,8 @@ class piDhtBot:
 				self.addRecord(record)
 
 			try:
-				temp = (self.dhtDevice.temperature + self.config["dht"]["offset_temp"]) * self.config["dht"]["scale_temp"]
-				hum = (self.dhtDevice.humidity + self.config["dht"]["offset_hum"]) * self.config["dht"]["scale_hum"]
-
+				temp = self.dhtDevice.temperature
+				hum = self.dhtDevice.humidity
 			except RuntimeError as e:
 				# errors are expected when reading from DHT, only log them in debug mode
 				self.logger.debug('DHT: Received exception: %s' % e)
@@ -678,6 +677,9 @@ class piDhtBot:
 				self.logger.debug('DHT: Read incomplete data, trying again')
 				time.sleep(0.2)
 				continue
+
+			temp = (temp + self.config["dht"]["offset_temp"]) * self.config["dht"]["scale_temp"]
+			hum = (hum + self.config["dht"]["offset_hum"]) * self.config["dht"]["scale_hum"]
 
 			# read from sensor succeeded
 			if firstRead:
