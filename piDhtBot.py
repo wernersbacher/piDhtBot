@@ -160,7 +160,7 @@ class piDhtBot:
 			self.logger.error('Could not access Telegram API within time, shutting down')
 			sys.exit(1)
 
-		self.send_all("Hello, I'm back online!")
+		#self.send_all("Hello, I'm back online!")
 
 		threads = []
 
