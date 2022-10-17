@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import traceback
 
 import adafruit_dht
 import datetime
@@ -18,7 +19,7 @@ from collections import deque
 
 import requests
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, MAX_MESSAGE_LENGTH
-from telegram.error import NetworkError, Unauthorized
+from telegram.error import NetworkError, Unauthorized, TelegramError
 from telegram.ext import Updater, MessageHandler, Filters, CallbackQueryHandler
 import mh_z19
 from Records import RecordCollection, DHTRecord, MHZRecord
@@ -201,7 +202,7 @@ class piDhtBot:
 		# messages
 		dispatcher.add_handler(CallbackQueryHandler(self.plotCallback))
 		dispatcher.add_handler(MessageHandler(Filters.text, self.performCommand))
-		self.updater.start_polling()
+		self.updater.start_polling(error_callback=self.error_callback)
 
 		while True:
 			time.sleep(5)
@@ -765,6 +766,10 @@ class piDhtBot:
 				pass
 
 		self.logger.info('Cleanup done')
+
+	def error_callback(self, error: TelegramError):
+		print(f"Error callback was called: \n{error}")
+		logging.error(traceback.format_exc())
 
 	def signalHandler(self, signal, frame):
 		"""Signal handler."""
