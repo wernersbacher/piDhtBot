@@ -593,7 +593,8 @@ class piDhtBot:
 		if self.config['mhz']['enabled']:
 			recordMHZ = self.lastRecordMHZ
 			output += f"CO2: {recordMHZ.co2} ppm"
-			return output
+
+		return output
 
 	def webhook_refresh(self):
 		"""sends current state to configured webhook
