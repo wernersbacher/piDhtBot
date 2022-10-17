@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import traceback
 
 import adafruit_dht
 import datetime
@@ -18,9 +17,8 @@ import time
 from collections import deque
 
 import requests
-from requests.adapters import HTTPAdapter, Retry
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, MAX_MESSAGE_LENGTH
-from telegram.error import NetworkError, Unauthorized, TelegramError
+from telegram.error import NetworkError, Unauthorized
 from telegram.ext import Updater, MessageHandler, Filters, CallbackQueryHandler
 import mh_z19
 from Records import RecordCollection, DHTRecord, MHZRecord
@@ -203,7 +201,7 @@ class piDhtBot:
 		# messages
 		dispatcher.add_handler(CallbackQueryHandler(self.plotCallback))
 		dispatcher.add_handler(MessageHandler(Filters.text, self.performCommand))
-		#dispatcher.add_error_handler(self.error_callback)
+		self.updater.start_polling()
 
 		while True:
 			time.sleep(5)
@@ -630,19 +628,14 @@ class piDhtBot:
 
 			formatted_url = url.format(temp*webhook_multi, hum*webhook_multi, co2*webhook_multi)
 			try:
-
-				s = requests.Session()
-
-				retries = Retry(total=5, backoff_factor=0.2)
-				s.mount('http://', HTTPAdapter(max_retries=retries))
-				s.get(formatted_url)
+				requests.get(formatted_url)
 			except requests.exceptions.RequestException as e:
 				self.logger.warning(f"Could not update webhook URL: {formatted_url} \n {e}")
 
-			nextSend = now + webhook_interval
+			nextRead = now + webhook_interval
 			now = time.time()
-			if now < nextSend:
-				time.sleep(nextSend - now)
+			if now < nextRead:
+				time.sleep(nextRead - now)
 
 	def readDHT(self):
 		"""Continuously read from the DHT sensor."""
@@ -772,10 +765,6 @@ class piDhtBot:
 				pass
 
 		self.logger.info('Cleanup done')
-
-	def error_callback(self, update, context):
-		print("Called custom callback error")
-		logging.error(traceback.format_exc())
 
 	def signalHandler(self, signal, frame):
 		"""Signal handler."""
