@@ -202,7 +202,7 @@ class piDhtBot:
 		# messages
 		dispatcher.add_handler(CallbackQueryHandler(self.plotCallback))
 		dispatcher.add_handler(MessageHandler(Filters.text, self.performCommand))
-		self.updater.start_polling(error_callback=self.error_callback)
+		dispatcher.add_error_handler(self.error_callback)
 
 		while True:
 			time.sleep(5)
@@ -767,8 +767,8 @@ class piDhtBot:
 
 		self.logger.info('Cleanup done')
 
-	def error_callback(self, error: TelegramError):
-		print(f"Error callback was called: \n{error}")
+	def error_callback(self, update, context):
+		print("Called custom callback error")
 		logging.error(traceback.format_exc())
 
 	def signalHandler(self, signal, frame):
