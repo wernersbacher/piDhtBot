@@ -629,14 +629,14 @@ class piDhtBot:
 
 			formatted_url = url.format(temp*webhook_multi, hum*webhook_multi, co2*webhook_multi)
 			try:
-				requests.get(formatted_url)
+				requests.get(formatted_url, total=5, backoff_factor=0.3)
 			except requests.exceptions.RequestException as e:
 				self.logger.warning(f"Could not update webhook URL: {formatted_url} \n {e}")
 
-			nextRead = now + webhook_interval
+			nextSend = now + webhook_interval
 			now = time.time()
-			if now < nextRead:
-				time.sleep(nextRead - now)
+			if now < nextSend:
+				time.sleep(nextSend - now)
 
 	def readDHT(self):
 		"""Continuously read from the DHT sensor."""
