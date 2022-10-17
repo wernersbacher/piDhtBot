@@ -18,6 +18,7 @@ import time
 from collections import deque
 
 import requests
+from requests.adapters import HTTPAdapter, Retry
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, MAX_MESSAGE_LENGTH
 from telegram.error import NetworkError, Unauthorized, TelegramError
 from telegram.ext import Updater, MessageHandler, Filters, CallbackQueryHandler
@@ -629,7 +630,12 @@ class piDhtBot:
 
 			formatted_url = url.format(temp*webhook_multi, hum*webhook_multi, co2*webhook_multi)
 			try:
-				requests.get(formatted_url, total=5, backoff_factor=0.3)
+
+				s = requests.Session()
+
+				retries = Retry(total=5, backoff_factor=0.2)
+				s.mount('http://', HTTPAdapter(max_retries=retries))
+				s.get(formatted_url)
 			except requests.exceptions.RequestException as e:
 				self.logger.warning(f"Could not update webhook URL: {formatted_url} \n {e}")
 
