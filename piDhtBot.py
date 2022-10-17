@@ -203,7 +203,7 @@ class piDhtBot:
 		# messages
 		dispatcher.add_handler(CallbackQueryHandler(self.plotCallback))
 		dispatcher.add_handler(MessageHandler(Filters.text, self.performCommand))
-		dispatcher.add_error_handler(self.error_callback)
+		#dispatcher.add_error_handler(self.error_callback)
 
 		while True:
 			time.sleep(5)
