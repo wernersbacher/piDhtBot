@@ -616,9 +616,10 @@ class piDhtBot:
 				continue
 
 			formatted_url = url.format(temp*webhook_multi, hum*webhook_multi, co2*webhook_multi)
-			r = requests.get(formatted_url)
-			if r.status_code != 200:
-				self.logger.warning(f"Could not update webhook: {r.status_code}, \nURL: {formatted_url}")
+			try:
+				requests.get(formatted_url)
+			except requests.exceptions.RequestException as e:
+				self.logger.warning(f"Could not update webhook URL: {formatted_url} \n {e}")
 
 			nextRead = now + webhook_interval
 			now = time.time()
