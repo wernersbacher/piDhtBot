@@ -160,7 +160,18 @@ class piDhtBot:
 			self.logger.error('Could not access Telegram API within time, shutting down')
 			sys.exit(1)
 
-		#self.send_all("Hello, I'm back online!")
+		# self.send_all("Hello, I'm back online!")
+
+		# setup dht device ONCE
+		gpio = int(self.config['dht']['gpio'])
+		sensor = self.config['dht']['type']
+		if sensor == 'DHT11':
+			self.dhtDevice = adafruit_dht.DHT11(gpio)
+		elif sensor == 'DHT22':
+			self.dhtDevice = adafruit_dht.DHT22(gpio)
+		else:
+			self.logger.error('DHT: Invalid sensor type: %s' % sensor)
+			sys.exit(1)
 
 		threads = []
 
@@ -632,15 +643,6 @@ class piDhtBot:
 
 		# minimum read interval is 2.0, lower intervals will return cached values
 		readInterval = max(2.0, float(self.config['dht']['read_interval']))
-		gpio = int(self.config['dht']['gpio'])
-		sensor = self.config['dht']['type']
-		if sensor == 'DHT11':
-			self.dhtDevice = adafruit_dht.DHT11(gpio)
-		elif sensor == 'DHT22':
-			self.dhtDevice = adafruit_dht.DHT22(gpio)
-		else:
-			self.logger.error('DHT: Invalid sensor type: %s' % sensor)
-			sys.exit(1)
 
 		# add gap marker
 		now = datetime.datetime.now()
